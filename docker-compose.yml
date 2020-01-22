@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.15.2
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+  grafana:
+    image: grafana/grafana:6.5.3
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: pass1234
+    ports:
+      - "3000:3000"
+  redis:
+    image: redis:5.0.6-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+  redis-exporter:
+    image: oliver006/redis_exporter:alpine
+    container_name: redis-exporter
+    environment:
+      REDIS_ADDR: redis://redis:6379
+    ports:
+      - "9121:9121"
