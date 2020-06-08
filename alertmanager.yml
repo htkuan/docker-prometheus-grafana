@@ -3,12 +3,13 @@ global:
   slack_api_url: https://slack.com/api/chat.postMessage  # if using slack api need give bearer_token
   resolve_timeout: 1m
 
+
 # The root node of the routing tree.
 route:
   receiver: 'null'
   group_wait: 10s
   group_interval: 1m
-  repeat_interval: 2m
+  repeat_interval: 1m
   routes:
     - receiver: 'slack'        
       group_wait: 10s        
@@ -24,7 +25,7 @@ receivers:
       - channel: 'error'
         username: 'alertmanager'
         icon_emoji: ':fire:'
-        text: "{{ .CommonLabels }} | {{ .CommonAnnotations }} | {{ .Alerts }}"
+        text: "Alerts:{{ .Alerts }}"
         http_config:  # for slack api setting
           bearer_token: <token>
 
