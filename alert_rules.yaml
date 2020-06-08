@@ -1,0 +1,19 @@
+groups:
+  - name: redis-rule
+    rules:
+      - alert: RedisTooManyKeys
+        expr: redis_db_keys{db="db0"} > 2
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Too many keys on {{ $labels.db }}"
+          description: "{{ $labels.instance }} has too many keys(current value: {{ $value }}s)"
+      - alert: RedisMemoryHighUsage
+        expr: redis_memory_used_bytes > 854488
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High memory usage"
+          description: "{{ $labels.instance }} has high memory usage(current value: {{ $value }}s)"

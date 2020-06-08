@@ -1,0 +1,33 @@
+global:
+  # slack_api_url: https://hooks.slack.com/services/xxxxxxx/xxxxxxxx/xxxxxxx  # this is for Incoming Webhooks
+  slack_api_url: https://slack.com/api/chat.postMessage  # if using slack api need give bearer_token
+  resolve_timeout: 1m
+
+# The root node of the routing tree.
+route:
+  receiver: 'null'
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 2m
+  routes:
+    - receiver: 'slack'        
+      group_wait: 10s        
+      match_re:
+        alertname: RedisTooManyKeys|RedisMemoryHighUsage
+
+
+# A list of notification receivers.
+receivers:
+  - name: 'null'
+  - name: 'slack'
+    slack_configs:
+      - channel: 'error'
+        username: 'alertmanager'
+        icon_emoji: ':fire:'
+        text: "{{ .CommonLabels }} | {{ .CommonAnnotations }} | {{ .Alerts }}"
+        http_config:  # for slack api setting
+          bearer_token: <token>
+
+# A list of inhibition rules.
+# inhibit_rules:
+#   - 
