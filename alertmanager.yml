@@ -2,6 +2,10 @@ global:
   # slack_api_url: https://hooks.slack.com/services/xxxxxxx/xxxxxxxx/xxxxxxx  # this is for Incoming Webhooks
   slack_api_url: https://slack.com/api/chat.postMessage  # if using slack api need give bearer_token
   resolve_timeout: 1m
+  smtp_from: alertmanager@email.com
+  smtp_smarthost: <smtphost>
+  smtp_auth_username: <username>
+  smtp_auth_password: <password>
 
 
 # The root node of the routing tree.
@@ -11,10 +15,16 @@ route:
   group_interval: 1m
   repeat_interval: 1m
   routes:
-    - receiver: 'slack'        
-      group_wait: 10s        
+    - receiver: 'email'
+      group_by: ['service', 'severity']
+      continue: true
       match_re:
-        alertname: RedisTooManyKeys|RedisMemoryHighUsage
+        severity: critical|warning
+    - receiver: 'slack'
+      group_by: ['service', 'severity']
+      continue: true
+      match_re:
+        alertname: RedisTooManyKeys|PrometheusAlertPagesRequestsCount
 
 
 # A list of notification receivers.
@@ -25,9 +35,14 @@ receivers:
       - channel: 'error'
         username: 'alertmanager'
         icon_emoji: ':fire:'
-        text: "Alerts:{{ .Alerts }}"
+        title: "[{{ .CommonLabels.severity }}]: {{ .CommonAnnotations.summary }}"
+        text: "{{ .CommonLabels.service }}: \n {{ .CommonAnnotations.description }} \n {{ .Alerts }}"
         http_config:  # for slack api setting
           bearer_token: <token>
+  - name: 'email'
+    email_configs:
+      - to: 'demo@email.com'
+
 
 # A list of inhibition rules.
 # inhibit_rules:

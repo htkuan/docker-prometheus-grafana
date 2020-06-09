@@ -1,11 +1,12 @@
 groups:
-  - name: redis-rule
+  - name: redis.rules
     rules:
       - alert: RedisTooManyKeys
         expr: redis_db_keys{db="db0"} > 2
         for: 1m
         labels:
           severity: warning
+          service: redis
         annotations:
           summary: "Too many keys on {{ $labels.db }}"
           description: "{{ $labels.instance }} has too many keys(current value: {{ $value }}s)"
@@ -14,6 +15,18 @@ groups:
         for: 1m
         labels:
           severity: critical
+          service: redis
         annotations:
           summary: "High memory usage"
           description: "{{ $labels.instance }} has high memory usage(current value: {{ $value }}s)"
+  - name: prometheus.rules
+    rules:
+      - alert: PrometheusAlertPagesRequestsCount
+        expr: prometheus_http_requests_total{handler="/alerts"} > 10
+        for: 30s
+        labels:
+          severity: page
+          service: prometheus
+        annotations:
+          summary: "alert page request"
+          description: "{{ $labels.instance }} (alert page request current value: {{ $value }}s)"
